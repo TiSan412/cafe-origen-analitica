@@ -341,3 +341,133 @@ Se establecieron tres escenarios para comprobar las funciones:
 Se implementaron funciones reutilizables para calcular indicadores de ventas mediante ciclos `for...of`, condicionales y acumuladores.
 
 También se estableció un comportamiento específico para los arreglos vacíos y se incorporó la normalización de ciudades para evitar diferencias causadas por mayúsculas y espacios sobrantes.
+
+-------------------------------------------------------
+
+Métodos de arreglos y agrupación de datos
+
+1. Versiones con métodos de arreglos
+
+totalVendidoM(ventas)
+
+¿Qué recorro? Todos los registros del arreglo de ventas.
+
+¿Qué filtro? No se aplica ningún filtro.
+
+¿Qué transformo? No se transforman los registros.
+
+¿Qué acumulo? El valor monetario de cada venta mediante valorVenta(venta).
+
+¿Cómo agrupo? No se agrupa información.
+
+Método utilizado: reduce().
+
+Valor inicial: 0.
+
+unidadesVendidasM(ventas)
+
+¿Qué recorro? Todas las ventas.
+
+¿Qué filtro? No se aplica ningún filtro.
+
+¿Qué transformo? No se transforman los registros.
+
+¿Qué acumulo? Las cantidades de unidades de cada venta.
+
+¿Cómo agrupo? No se agrupa información.
+
+Método utilizado: reduce().
+
+Valor inicial: 0.
+
+ventasPorCiudadM(ventas, ciudad)
+
+¿Qué recorro? Todas las ventas.
+
+¿Qué filtro? Las ventas cuya ciudad coincide con la ciudad solicitada.
+
+¿Qué transformo? Normalizo los nombres de las ciudades utilizando trim() y toLowerCase().
+
+¿Qué acumulo? El valor monetario de las ventas que cumplen la condición.
+
+¿Cómo agrupo? No se agrupa información; se calcula el total de una ciudad específica.
+
+Métodos utilizados: filter() y reduce().
+
+Valor inicial: 0.
+
+2. Funciones de agrupación
+
+totalPorCiudad(ventas)
+
+¿Qué recorro? Todos los registros de ventas.
+
+¿Qué filtro? No se aplica ningún filtro.
+
+¿Qué transformo? Normalizo los nombres de las ciudades para evitar grupos duplicados por diferencias de espacios o mayúsculas.
+
+¿Qué acumulo? El valor monetario de cada venta.
+
+¿Cómo agrupo? Utilizo la ciudad como propiedad del objeto acumulador.
+
+Método utilizado: reduce().
+
+Valor inicial: objeto vacío {}.
+
+unidadesPorProducto(ventas)
+
+¿Qué recorro? Todas las ventas.
+
+¿Qué filtro? No se aplica ningún filtro.
+
+¿Qué transformo? Obtengo el nombre del producto y elimino espacios sobrantes.
+
+¿Qué acumulo? Las unidades vendidas de cada producto.
+
+¿Cómo agrupo? Utilizo el nombre del producto como propiedad del objeto acumulador.
+
+Método utilizado: reduce().
+
+Valor inicial: objeto vacío {}.
+
+topProductosPorValor(ventas, k)
+
+¿Qué recorro? Todas las ventas.
+
+¿Qué filtro? No se aplica un filtro inicial.
+
+¿Qué transformo? Convierto los totales agrupados en un arreglo de objetos.
+
+¿Qué acumulo? El dinero generado por cada producto.
+
+¿Cómo agrupo? Agrupo las ventas por producto utilizando reduce().
+
+¿Cómo ordeno? Utilizo sort() de mayor a menor.
+
+¿Cómo selecciono? Utilizo slice() para obtener los primeros K productos.
+
+Métodos utilizados: reduce(), sort(), slice() y map().
+
+3. Verificación de resultados
+
+Se creó el archivo verificar.js para comparar las funciones implementadas mediante ciclos tradicionales con sus versiones desarrolladas mediante métodos de arreglos.
+
+Se utilizaron los mismos registros para ambas implementaciones.
+
+Los indicadores comparados fueron:
+
+Total vendido.
+
+Unidades vendidas.
+
+Ventas por ciudad.
+
+La comparación permite identificar si ambas versiones producen resultados equivalentes.
+
+4. Conclusión
+
+En esta actividad se profundizó en el uso de métodos de arreglos de JavaScript.
+
+Se aprendió a utilizar reduce() para acumular información, filter() para seleccionar registros, sort() para ordenar resultados, slice() para seleccionar una cantidad determinada de elementos y map() para transformar información.
+
+También se aplicaron técnicas de agrupación de datos mediante objetos, permitiendo construir indicadores por ciudad y producto.
