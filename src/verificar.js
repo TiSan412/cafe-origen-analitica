@@ -35,7 +35,7 @@ function verificar(nombre, resultadoCiclo, resultadoMetodo) {
 
 }
 
-resultadoCiclo === resultadoMetodo
+
 
 verificar(
     "Total vendido",

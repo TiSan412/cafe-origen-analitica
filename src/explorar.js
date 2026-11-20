@@ -15,7 +15,6 @@ console.log("Producto en la posición 4:", ventas[4].producto);
 // Tabla completa
 console.table(ventas);
 
-const ventas = require("./datos.js");
 
 const {
     valorVenta,

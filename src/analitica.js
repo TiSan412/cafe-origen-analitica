@@ -5,6 +5,19 @@ function valorVenta(venta) {
 
 
 // 2. Calcular el total vendido
+function totalVendido(ventas) {
+
+    let total = 0;
+
+    for (const venta of ventas) {
+
+        total += valorVenta(venta);
+
+    }
+
+    return total;
+}
+
 function totalVendidoM(ventas) {
 
     return ventas.reduce((total, venta) => {
@@ -15,7 +28,21 @@ function totalVendidoM(ventas) {
 
 }
 
+
 // 3. Calcular las unidades vendidas
+function unidadesVendidas(ventas) {
+
+    let unidades = 0;
+
+    for (const venta of ventas) {
+
+        unidades += venta.cantidad;
+
+    }
+
+    return unidades;
+}
+
 function unidadesVendidasM(ventas) {
 
     return ventas.reduce((total, venta) => {
@@ -25,6 +52,7 @@ function unidadesVendidasM(ventas) {
     }, 0);
 
 }
+
 
 // 4. Encontrar la venta de mayor valor
 function ventaMayor(ventas) {
@@ -79,6 +107,27 @@ function ticketPromedio(ventas) {
 
 
 // 6. Calcular las ventas por ciudad
+function ventasPorCiudad(ventas, ciudad) {
+
+    let total = 0;
+
+    const ciudadBuscada = ciudad.trim().toLowerCase();
+
+    for (const venta of ventas) {
+
+        const ciudadActual = venta.ciudad.trim().toLowerCase();
+
+        if (ciudadActual === ciudadBuscada) {
+
+            total += valorVenta(venta);
+
+        }
+
+    }
+
+    return total;
+}
+
 function ventasPorCiudadM(ventas, ciudad) {
 
     return ventas
@@ -93,6 +142,46 @@ function ventasPorCiudadM(ventas, ciudad) {
             return total + valorVenta(venta);
 
         }, 0);
+
+}
+
+function totalPorCiudad(ventas) {
+
+    return ventas.reduce((acumulador, venta) => {
+
+        const ciudad = venta.ciudad.trim().toLowerCase();
+
+        if (!acumulador[ciudad]) {
+
+            acumulador[ciudad] = 0;
+
+        }
+
+        acumulador[ciudad] += valorVenta(venta);
+
+        return acumulador;
+
+    }, {});
+
+}
+
+function unidadesPorProducto(ventas) {
+
+    return ventas.reduce((acumulador, venta) => {
+
+        const producto = venta.producto.trim();
+
+        if (!acumulador[producto]) {
+
+            acumulador[producto] = 0;
+
+        }
+
+        acumulador[producto] += venta.cantidad;
+
+        return acumulador;
+
+    }, {});
 
 }
 
@@ -131,7 +220,6 @@ function topProductosPorValor(ventas, k) {
 
 }
 
-
 // Exportar las funciones
 module.exports = {
     valorVenta,
@@ -139,24 +227,11 @@ module.exports = {
     unidadesVendidas,
     ventaMayor,
     ticketPromedio,
-    ventasPorCiudad
-};
-module.exports = {
-
-    valorVenta,
-
-    totalVendido,
-    unidadesVendidas,
-    ventaMayor,
-    ticketPromedio,
     ventasPorCiudad,
-
     totalVendidoM,
     unidadesVendidasM,
     ventasPorCiudadM,
-
     totalPorCiudad,
     unidadesPorProducto,
     topProductosPorValor
-
 };
