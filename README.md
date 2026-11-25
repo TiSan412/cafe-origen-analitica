@@ -1,50 +1,51 @@
 # Café Origen — Análisis de ventas
 
-Proyecto de práctica en JavaScript (CommonJS) para analizar 12 registros de ventas de Café Origen. Incluye cálculos mediante ciclos, métodos de arreglos, agrupaciones y un reporte en consola.
+Proyecto de práctica en JavaScript (CommonJS) para analizar ventas de Café Origen, generar datos sintéticos y estudiar el crecimiento de las operaciones de distintos algoritmos.
 
 ## Requisitos
-
 - Node.js instalado.
 - No requiere dependencias externas.
 
 ## Cómo ejecutarlo
 
-Desde la carpeta raíz del proyecto:
+Desde la carpeta raíz:
 
 ```bash
 node src/reporte.js
 ```
 
-Para ejecutar las pruebas de verificación:
+Generar ventas aleatorias y medir operaciones para n = 100, 1.000, 10.000 y 100.000:
+
+```bash
+node src/medir.js
+```
+
+Ejecutar las pruebas de análisis:
 
 ```bash
 node src/verificar.js
 ```
 
 ## ¿Qué preguntas responde?
-
-- ¿Cuánto se vendió en total?
-- ¿Cuántas unidades se vendieron?
-- ¿Cuál fue el ticket promedio de las ventas válidas?
-- ¿Cuánto se vendió en cada ciudad?
+- ¿Cuánto se vendió en total y por ciudad?
 - ¿Cuántas unidades se vendieron por producto?
+- ¿Cuál es el ticket promedio y qué sucede si no hay ventas?
 - ¿Cuáles son los tres productos con mayor valor vendido?
-- ¿Qué ventas se registraron en una fecha determinada?
-- ¿Qué resultado se obtiene cuando se consulta un día sin ventas?
+- ¿Cómo crece el número de operaciones cuando aumenta el tamaño del arreglo?
+- ¿Qué diferencia hay entre una función O(1) y una O(n)?
 
-## Decisiones de análisis
-
-- Una venta es válida para el ticket promedio cuando `cantidad > 0`.
-- El ticket promedio se calcula por registro de venta válido, no por unidad.
-- Si no existen ventas válidas, `ticketPromedio()` devuelve `null`; el reporte muestra "No disponible" en lugar de `NaN`.
-- Las ciudades se agrupan después de aplicar `trim()` y `toLowerCase()`, para unificar diferencias de espacios y mayúsculas.
-- Los datos originales se conservan sin modificaciones.
-- Los nombres de productos se agrupan por su texto después de quitar espacios sobrantes. Por eso "Origen Nariño" y "Origen Nariño 250g" permanecen como etiquetas distintas hasta confirmar si son el mismo producto.
+## Generación y medición
+- `src/generador.js` exporta `generarVentas(n)`, que crea n ventas con la misma estructura de los datos originales.
+- Los productos, precios y ciudades se eligen de listas fijas; cliente, producto, ciudad y cantidad se seleccionan aleatoriamente.
+- `src/analitica.js` incluye versiones instrumentadas que cuentan visitas y comparaciones.
+- `src/medir.js` ejecuta las funciones para cuatro tamaños y muestra una tabla de operaciones.
+- `bitacora.md` contiene la predicción previa, el criterio de conteo, los resultados y la clasificación de complejidad.
 
 ## Estructura
-
 - `src/datos.js`: registros originales.
-- `src/analitica.js`: funciones reutilizables de cálculo y filtrado.
-- `src/reporte.js`: informe general y consultas por día.
-- `src/verificar.js`: pruebas y comprobaciones de resultados.
-- `bitacora.md`: decisiones, casos borde y registro de errores.
+- `src/analitica.js`: funciones de análisis e instrumentación.
+- `src/generador.js`: generación de datos de prueba.
+- `src/reporte.js`: informe de ventas.
+- `src/medir.js`: experimento de crecimiento de operaciones.
+- `src/verificar.js`: pruebas y comprobaciones.
+- `bitacora.md`: decisiones, errores y análisis de complejidad.
