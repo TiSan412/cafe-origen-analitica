@@ -7,15 +7,15 @@ const {
 
     totalVendidoM,
     unidadesVendidasM,
-    ventasPorCiudadM
+    ventasPorCiudadM,
 
-} = require("./analitica.js");
-
-const {
     totalPorCiudad,
     unidadesPorProducto,
     topProductosPorValor
+
 } = require("./analitica.js");
+
+
 
 function verificar(nombre, resultadoCiclo, resultadoMetodo) {
 
