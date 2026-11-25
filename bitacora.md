@@ -1,473 +1,96 @@
-Bitácora del proyecto: Análisis de ventas
+# Bitácora — Café Origen: análisis de ventas
 
-1. Diccionario de datos
+## 1. Descripción de los datos
 
-El conjunto de datos contiene 12 registros de ventas. Cada registro representa una transacción realizada por un cliente.
+El conjunto contiene 12 registros. Cada registro incluye: `id`, `fecha`, `cliente`, `producto`, `ciudad`, `cantidad` y `precio`.
 
-Propiedad/Tipo de dato/Significado/id/Number
+Se conserva el registro con cantidad 0 (ID 8) porque no se debe alterar el dato de origen sin confirmar su significado. Para el ticket promedio se excluyen los registros cuya cantidad no sea mayor que cero.
 
-Identificador único de cada registro de venta.
+## 2. Casos borde y decisiones
 
-fecha
+- **Cantidad igual a cero:** se conserva el registro, pero no cuenta como venta válida para el ticket promedio.
+- **Arreglo vacío:** los totales y unidades devuelven 0; `ventaMayor` y `ticketPromedio` devuelven `null`.
+- **Ciudades:** se normalizan con `trim().toLowerCase()` antes de comparar o agrupar.
+- **Productos:** se eliminan espacios sobrantes, pero no se fusionan etiquetas diferentes sin confirmación. En los datos existen "Origen Nariño" y "Origen Nariño 250g"; se mantienen separados.
 
-String
+## 3. Funciones implementadas
 
-Fecha en la que se realizó la venta, representada en formato AAAA-MM-DD.
+- `valorVenta(venta)`: multiplica cantidad por precio.
+- `totalVendido(ventas)` y `totalVendidoM(ventas)`: total monetario con ciclo y reduce.
+- `unidadesVendidas(ventas)` y `unidadesVendidasM(ventas)`: unidades con ciclo y reduce.
+- `ventaMayor(ventas)`: venta válida de mayor valor; devuelve null si no hay.
+- `ticketPromedio(ventas)`: promedio del valor por registro válido; devuelve null si no hay ventas válidas.
+- `ventasPorCiudad()` y `ventasPorCiudadM()`: total de una ciudad con normalización.
+- `totalPorCiudad()`: agrupa el valor vendido por ciudad normalizada.
+- `unidadesPorProducto()`: agrupa unidades por nombre de producto.
+- `topProductosPorValor()`: ordena los productos por valor vendido y devuelve los primeros K.
+- `ventasDelDia(ventas, fecha)`: devuelve un arreglo con las ventas de la fecha exacta (AAAA-MM-DD).
 
-cliente
+## 4. Errores reportados por la gerente y su verificación
 
-String
+### Error 1. Bogotá aparecía dos veces
 
-Código que identifica al cliente que realizó la compra.
+- **Síntoma:** el informe mostraba dos filas para Bogotá.
+- **Entrada que lo produce:** nombres equivalentes con diferencias de formato, por ejemplo `"Bogotá"`, `" bogotá "` y `"BOGOTÁ"`.
+- **Hipótesis:** la agrupación utilizaba el texto original como clave, por lo que cada variante se convertía en un grupo diferente.
+- **Prueba realizada:** se creó un arreglo de prueba con esas tres variantes y se ejecutó `totalPorCiudad()`.
+- **Causa:** no normalizar el nombre antes de utilizarlo como clave del acumulador produce grupos separados. En la versión actual la función sí normaliza con `trim().toLowerCase()`.
+- **Corrección:** normalizar la ciudad antes de crear o actualizar su grupo. La prueba automatizada comprueba que exista una sola clave (`"bogotá"`) y que el total agrupado sea 400.
 
-producto
+### Error 2. El ticket promedio daba NaN al filtrar un día sin ventas
 
-String
+- **Síntoma:** al consultar un día sin registros, el ticket promedio aparecía como `NaN`.
+- **Entrada que lo produce:** `ventasDelDia(ventas, "2026-09-07")`, que devuelve un arreglo vacío con los datos actuales.
+- **Hipótesis:** se estaba dividiendo el total entre cero ventas, o no se controlaba el resultado de una consulta vacía.
+- **Prueba realizada:** se filtra el 7 de septiembre de 2026 y se pasa el arreglo resultante a `ticketPromedio()`.
+- **Causa:** el promedio no está definido cuando no hay ventas válidas; una división entre cero puede producir `NaN`.
+- **Corrección:** `ticketPromedio()` verifica si el contador de ventas válidas es cero y devuelve `null`. El reporte convierte ese valor en el texto "No disponible". La prueba automatizada verifica que el resultado sea null y que no sea NaN.
 
-Nombre o descripción del producto vendido.
+## 5. Resultados esperados con los 12 registros actuales
 
-ciudad
+| Indicador | Resultado |
+|---|---:|
+| Registros | 12 |
+| Ventas válidas (cantidad > 0) | 11 |
+| Unidades | 22 |
+| Total vendido | $1.080.000 |
+| Ticket promedio | $98.181,82 |
 
-String
+### Total vendido por ciudad
 
-Ciudad asociada a la venta.
+| Ciudad | Total |
+|---|---:|
+| Medellín | $356.000 |
+| Cali | $280.000 |
+| Bogotá | $276.000 |
+| Pereira | $168.000 |
 
-cantidad
+### Unidades por producto
 
-Number
+| Producto | Unidades |
+|---|---:|
+| Origen Huila 500g | 7 |
+| Origen Sierra 500g | 5 |
+| Origen Nariño 250g | 3 |
+| Prensa francesa | 3 |
+| Origen Nariño | 3 |
+| Molino manual | 1 |
 
-Número de unidades registradas en la venta.
+### Top 3 por valor vendido
 
-2. Casos borde detectados
+1. Origen Huila 500g — $294.000.
+2. Prensa francesa — $285.000.
+3. Origen Sierra 500g — $225.000.
 
-Durante la exploración de los 12 registros se identificaron los siguientes casos que requieren atención:
+## 6. Pruebas y ejecución
 
-Caso 1. Inconsistencia en el nombre de las ciudades
+Ejecutar desde la raíz:
 
-Problema: En el registro con ID 5 aparece la ciudad "medellín" con minúscula inicial, mientras que en los registros 1, 4 y 11 aparece como "Medellín".
-
-Decisión: Se conservará el valor original en esta primera etapa para respetar la información de origen. Posteriormente, durante el proceso de limpieza, se unificarán los nombres de las ciudades utilizando un formato consistente.
-
-Caso 2. Cantidad igual a cero
-
-Problema: El registro con ID 8 presenta una cantidad de 0 unidades.
-
-Decisión: Se conservará el registro sin modificarlo. Se considera un caso que requiere validación, ya que una venta con cero unidades podría representar un error de captura o una transacción sin unidades efectivamente vendidas. No se eliminará hasta conocer el significado del dato.
-
-Caso 3. Clientes repetidos
-
-Problema: Los códigos C01, C02 y C03 aparecen en diferentes registros de ventas.
-
-Decisión: Se conservarán los registros repetidos porque un mismo cliente puede realizar varias compras en diferentes fechas. La repetición del código del cliente no representa necesariamente un error. No se eliminarán estos registros.
-
-Caso 4. Identificadores de clientes representados como texto
-
-Problema: Los identificadores de clientes utilizan códigos como "C01", "C02" y "C03", en lugar de números enteros.
-
-Decisión: Se conservarán como String porque son identificadores alfanuméricos. No deben convertirse a Number, ya que perderían su formato original y su significado como códigos de identificación.
-
-3. Observaciones generales
-
-Se encontraron 12 registros de ventas.
-
-Los identificadores de venta van del 1 al 12.
-
-Se identificaron cuatro ciudades: Medellín, Bogotá, Cali y Pereira.
-
-Las fechas están representadas mediante cadenas de texto.
-
-Se conservarán los datos originales durante la etapa de exploración.
-
-Las posibles correcciones se realizarán posteriormente mediante un proceso de limpieza de datos documentado.
----------------------------------------------------
-# 4. Plan de análisis en pseudocódigo
-
-Antes de implementar las funciones en JavaScript, se establece la lógica de cada indicador para definir los recorridos, condiciones, acumuladores y valores iniciales.
-
-## 4.1. valorVenta(venta)
-
-**Objetivo:** Calcular el valor monetario de una venta individual.
-
-- Recorrido: No requiere recorrer arreglos.
-- Condición: Ninguna.
-- Operación: Multiplicar cantidad por precio.
-- Acumulador: No utiliza.
-- Valor inicial: No requiere.
-
-```text
-FUNCIÓN valorVenta(venta)
-
-    Calcular cantidad × precio.
-
-    Devolver el resultado.
-
-FIN FUNCIÓN
+```bash
+node src/verificar.js
+node src/reporte.js
 ```
 
-## 4.2. totalVendido(ventas)
+Las pruebas cubren equivalencia entre ciclos y métodos, resultados generales, normalización de Bogotá, consulta de un día sin ventas y ausencia de NaN en las agrupaciones.
 
-**Objetivo:** Calcular el valor monetario de todas las ventas.
-
-- Recorrido: Todas las ventas del arreglo.
-- Condición: Ninguna adicional.
-- Acumulador: Suma del valor de cada venta.
-- Valor inicial: 0.
-
-```text
-FUNCIÓN totalVendido(ventas)
-
-    total = 0
-
-    PARA CADA venta EN ventas:
-
-        total = total + valorVenta(venta)
-
-    DEVOLVER total.
-
-FIN FUNCIÓN
-```
-
-## 4.3. unidadesVendidas(ventas)
-
-**Objetivo:** Calcular el número total de unidades vendidas.
-
-- Recorrido: Todas las ventas del arreglo.
-- Condición: Ninguna adicional.
-- Acumulador: Suma de las cantidades.
-- Valor inicial: 0.
-
-```text
-FUNCIÓN unidadesVendidas(ventas)
-
-    unidades = 0
-
-    PARA CADA venta EN ventas:
-
-        unidades = unidades + venta.cantidad
-
-    DEVOLVER unidades.
-
-FIN FUNCIÓN
-```
-
-## 4.4. ventaMayor(ventas)
-
-**Objetivo:** Identificar y devolver el registro completo de la venta válida con mayor valor monetario.
-
-- Recorrido: Todas las ventas.
-- Condición: Cantidad mayor que 0 y valor superior al máximo encontrado.
-- Acumulador: Referencia al objeto de la venta de mayor valor.
-- Valor inicial: null.
-
-```text
-FUNCIÓN ventaMayor(ventas)
-
-    mayor = null
-
-    PARA CADA venta EN ventas:
-
-        SI venta.cantidad > 0:
-
-            SI mayor ES null O valorVenta(venta) > valorVenta(mayor):
-
-                mayor = venta
-
-    DEVOLVER mayor.
-
-FIN FUNCIÓN
-```
-
-## 4.5. ticketPromedio(ventas)
-
-**Objetivo:** Calcular el promedio monetario de las ventas válidas.
-
-- Recorrido: Todas las ventas.
-- Condición: Cantidad mayor que 0.
-- Acumuladores:
-  - Suma del valor de las ventas válidas.
-  - Conteo de ventas válidas.
-- Valores iniciales: 0 para ambos acumuladores.
-
-```text
-FUNCIÓN ticketPromedio(ventas)
-
-    total = 0
-    cantidadVentas = 0
-
-    PARA CADA venta EN ventas:
-
-        SI venta.cantidad > 0:
-
-            total = total + valorVenta(venta)
-
-            cantidadVentas = cantidadVentas + 1
-
-    SI cantidadVentas ES igual a 0:
-
-        DEVOLVER null.
-
-    DEVOLVER total / cantidadVentas.
-
-FIN FUNCIÓN
-```
-
-## 4.6. ventasPorCiudad(ventas, ciudad)
-
-**Objetivo:** Calcular el valor monetario de las ventas realizadas en una ciudad determinada.
-
-- Recorrido: Todas las ventas.
-- Condición: La ciudad del registro debe coincidir con la ciudad solicitada.
-- Normalización: Convertir a minúsculas y eliminar espacios sobrantes.
-- Acumulador: Suma del valor de las ventas de la ciudad.
-- Valor inicial: 0.
-
-```text
-FUNCIÓN ventasPorCiudad(ventas, ciudad)
-
-    total = 0
-
-    ciudadBuscada = ciudad sin espacios sobrantes
-                    y convertida a minúsculas.
-
-    PARA CADA venta EN ventas:
-
-        ciudadActual = venta.ciudad sin espacios sobrantes
-                       y convertida a minúsculas.
-
-        SI ciudadActual ES igual a ciudadBuscada:
-
-            total = total + valorVenta(venta)
-
-    DEVOLVER total.
-
-FIN FUNCIÓN
-```
-
-## 4.7. Decisiones para arreglos vacíos
-
-| Función | Resultado esperado con [] | Justificación |
-|---|---:|---|
-| valorVenta(venta) | No aplica | Recibe un objeto, no un arreglo. |
-| totalVendido([]) | 0 | No existen valores que sumar. |
-| unidadesVendidas([]) | 0 | No existen unidades que contar. |
-| ventaMayor([]) | null | No existe un registro que devolver. |
-| ticketPromedio([]) | null | No se puede calcular un promedio sin ventas válidas. |
-| ventasPorCiudad([], ciudad) | 0 | No existen ventas para esa ciudad. |
-
-## 4.8. Consideraciones
-
-- Todas las funciones monetarias utilizarán `valorVenta()` para evitar repetir la multiplicación.
-- Las ventas con cantidad igual a cero no se considerarán válidas para calcular el ticket promedio ni para identificar la venta mayor.
-- Las ventas con cantidad cero se conservarán en los datos originales.
-- La comparación de ciudades ignorará diferencias entre mayúsculas, minúsculas y espacios sobrantes.
-- No se modificarán los datos originales durante los cálculos.
-- Los resultados monetarios definitivos dependerán de incorporar los precios unitarios correspondientes a cada producto.
-# 5. Verificación manual y pruebas
-
-## 5.1. Traza de unidades vendidas
-
-Se realizó una verificación manual del indicador `unidadesVendidas()` utilizando los 12 registros originales.
-
-La variable acumuladora inicia en 0 y suma la cantidad de cada registro.
-
-| ID | Cantidad | Acumulado |
-|---:|---:|---:|
-| 1 | 2 | 2 |
-| 2 | 1 | 3 |
-| 3 | 1 | 4 |
-| 4 | 1 | 5 |
-| 5 | 3 | 8 |
-| 6 | 2 | 10 |
-| 7 | 1 | 11 |
-| 8 | 0 | 11 |
-| 9 | 2 | 13 |
-| 10 | 4 | 17 |
-| 11 | 1 | 18 |
-| 12 | 3 | 21 |
-
-**Resultado manual:** 21 unidades.
-
-**Resultado esperado en JavaScript:** 21 unidades.
-
-Ambos resultados coinciden.
-
-## 5.2. Traza del conteo de ventas válidas
-
-Se verificó el contador utilizado en `ticketPromedio()`.
-
-La condición aplicada es que la cantidad de la venta sea mayor que 0.
-
-| ID | Cantidad | ¿Válida? | Contador |
-|---:|---:|---|---:|
-| 1 | 2 | Sí | 1 |
-| 2 | 1 | Sí | 2 |
-| 3 | 1 | Sí | 3 |
-| 4 | 1 | Sí | 4 |
-| 5 | 3 | Sí | 5 |
-| 6 | 2 | Sí | 6 |
-| 7 | 1 | Sí | 7 |
-| 8 | 0 | No | 7 |
-| 9 | 2 | Sí | 8 |
-| 10 | 4 | Sí | 9 |
-| 11 | 1 | Sí | 10 |
-| 12 | 3 | Sí | 11 |
-
-**Resultado manual:** 11 ventas válidas.
-
-**Resultado esperado en JavaScript:** 11 ventas válidas.
-
-Ambos resultados coinciden.
-
-## 5.3. Pruebas de casos borde
-
-Se establecieron tres escenarios para comprobar las funciones:
-
-1. Arreglo completo: permite verificar el comportamiento con los 12 registros.
-2. Arreglo de un elemento: permite comprobar el funcionamiento con una sola venta.
-3. Arreglo vacío: permite verificar que las funciones devuelvan los valores definidos para la ausencia de registros.
-
-| Función | Completo | Un elemento | Vacío |
-|---|---|---|---|
-| totalVendido | Valor monetario total | Valor de una venta | 0 |
-| unidadesVendidas | 21 | Cantidad de la primera venta | 0 |
-| ventaMayor | Objeto de mayor valor | Única venta | null |
-| ticketPromedio | Promedio de ventas válidas | Valor de la única venta válida | null |
-| ventasPorCiudad | Total de la ciudad consultada | Valor si coincide la ciudad | 0 |
-
-**Observación:** Los indicadores monetarios quedan pendientes de verificación definitiva hasta incorporar los precios unitarios de los productos.
-
-## 5.4. Conclusión
-
-Se implementaron funciones reutilizables para calcular indicadores de ventas mediante ciclos `for...of`, condicionales y acumuladores.
-
-También se estableció un comportamiento específico para los arreglos vacíos y se incorporó la normalización de ciudades para evitar diferencias causadas por mayúsculas y espacios sobrantes.
-
--------------------------------------------------------
-
-Métodos de arreglos y agrupación de datos
-
-1. Versiones con métodos de arreglos
-
-totalVendidoM(ventas)
-
-¿Qué recorro? Todos los registros del arreglo de ventas.
-
-¿Qué filtro? No se aplica ningún filtro.
-
-¿Qué transformo? No se transforman los registros.
-
-¿Qué acumulo? El valor monetario de cada venta mediante valorVenta(venta).
-
-¿Cómo agrupo? No se agrupa información.
-
-Método utilizado: reduce().
-
-Valor inicial: 0.
-
-unidadesVendidasM(ventas)
-
-¿Qué recorro? Todas las ventas.
-
-¿Qué filtro? No se aplica ningún filtro.
-
-¿Qué transformo? No se transforman los registros.
-
-¿Qué acumulo? Las cantidades de unidades de cada venta.
-
-¿Cómo agrupo? No se agrupa información.
-
-Método utilizado: reduce().
-
-Valor inicial: 0.
-
-ventasPorCiudadM(ventas, ciudad)
-
-¿Qué recorro? Todas las ventas.
-
-¿Qué filtro? Las ventas cuya ciudad coincide con la ciudad solicitada.
-
-¿Qué transformo? Normalizo los nombres de las ciudades utilizando trim() y toLowerCase().
-
-¿Qué acumulo? El valor monetario de las ventas que cumplen la condición.
-
-¿Cómo agrupo? No se agrupa información; se calcula el total de una ciudad específica.
-
-Métodos utilizados: filter() y reduce().
-
-Valor inicial: 0.
-
-2. Funciones de agrupación
-
-totalPorCiudad(ventas)
-
-¿Qué recorro? Todos los registros de ventas.
-
-¿Qué filtro? No se aplica ningún filtro.
-
-¿Qué transformo? Normalizo los nombres de las ciudades para evitar grupos duplicados por diferencias de espacios o mayúsculas.
-
-¿Qué acumulo? El valor monetario de cada venta.
-
-¿Cómo agrupo? Utilizo la ciudad como propiedad del objeto acumulador.
-
-Método utilizado: reduce().
-
-Valor inicial: objeto vacío {}.
-
-unidadesPorProducto(ventas)
-
-¿Qué recorro? Todas las ventas.
-
-¿Qué filtro? No se aplica ningún filtro.
-
-¿Qué transformo? Obtengo el nombre del producto y elimino espacios sobrantes.
-
-¿Qué acumulo? Las unidades vendidas de cada producto.
-
-¿Cómo agrupo? Utilizo el nombre del producto como propiedad del objeto acumulador.
-
-Método utilizado: reduce().
-
-Valor inicial: objeto vacío {}.
-
-topProductosPorValor(ventas, k)
-
-¿Qué recorro? Todas las ventas.
-
-¿Qué filtro? No se aplica un filtro inicial.
-
-¿Qué transformo? Convierto los totales agrupados en un arreglo de objetos.
-
-¿Qué acumulo? El dinero generado por cada producto.
-
-¿Cómo agrupo? Agrupo las ventas por producto utilizando reduce().
-
-¿Cómo ordeno? Utilizo sort() de mayor a menor.
-
-¿Cómo selecciono? Utilizo slice() para obtener los primeros K productos.
-
-Métodos utilizados: reduce(), sort(), slice() y map().
-
-3. Verificación de resultados
-
-Se creó el archivo verificar.js para comparar las funciones implementadas mediante ciclos tradicionales con sus versiones desarrolladas mediante métodos de arreglos.
-
-Se utilizaron los mismos registros para ambas implementaciones.
-
-Los indicadores comparados fueron:
-
-Total vendido.
-
-Unidades vendidas.
-
-Ventas por ciudad.
-
-La comparación permite identificar si ambas versiones producen resultados equivalentes.
-
-4. Conclusión
-
-En esta actividad se profundizó en el uso de métodos de arreglos de JavaScript.
-
-Se aprendió a utilizar reduce() para acumular información, filter() para seleccionar registros, sort() para ordenar resultados, slice() para seleccionar una cantidad determinada de elementos y map() para transformar información.
-
-También se aplicaron técnicas de agrupación de datos mediante objetos, permitiendo construir indicadores por ciudad y producto.
+**Nota de control:** el contenido de esta bitácora describe las pruebas automatizadas incorporadas. La ejecución real debe confirmarse en un entorno con Node.js; no se debe marcar como ejecutada hasta correr los comandos.
