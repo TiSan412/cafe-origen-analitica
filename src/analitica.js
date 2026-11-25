@@ -49,6 +49,20 @@ function topProductosPorValor(ventas,k) {
 }
 function ventasDelDia(ventas,fecha) { return ventas.filter(venta=>venta.fecha===fecha); }
 
+// Busca clientes que aparecen en dos o más ventas.
+function clientesRecurrentes(ventas) {
+    const recurrentes = [];
+    for (let i = 0; i < ventas.length; i++) {
+        for (let j = i + 1; j < ventas.length; j++) {
+            if (ventas[i].cliente === ventas[j].cliente &&
+                !recurrentes.includes(ventas[i].cliente)) {
+                recurrentes.push(ventas[i].cliente);
+            }
+        }
+    }
+    return recurrentes;
+}
+
 // Instrumentación: cada visita y cada comparación explícita cuenta como una operación.
 function registrarVisita(contador) {
     contador.visitas = (contador.visitas || 0) + 1;
@@ -97,4 +111,4 @@ function primeraVentaInstrumentada(ventas, contador) {
     return ventas[0];
 }
 
-module.exports={valorVenta,totalVendido,unidadesVendidas,ventaMayor,ticketPromedio,ventasPorCiudad,totalVendidoM,unidadesVendidasM,ventasPorCiudadM,totalPorCiudad,unidadesPorProducto,topProductosPorValor,ventasDelDia,totalVendidoInstrumentado,ventaMayorInstrumentada,totalPorCiudadInstrumentado,primeraVentaInstrumentada};
+module.exports={valorVenta,totalVendido,unidadesVendidas,ventaMayor,ticketPromedio,ventasPorCiudad,totalVendidoM,unidadesVendidasM,ventasPorCiudadM,totalPorCiudad,unidadesPorProducto,topProductosPorValor,ventasDelDia,clientesRecurrentes,totalVendidoInstrumentado,ventaMayorInstrumentada,totalPorCiudadInstrumentado,primeraVentaInstrumentada};

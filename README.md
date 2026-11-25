@@ -20,7 +20,13 @@ Generar ventas aleatorias y medir operaciones para n = 100, 1.000, 10.000 y 100.
 node src/medir.js
 ```
 
-Ejecutar las pruebas de análisis:
+Medir el tiempo de búsqueda de clientes recurrentes:
+
+```bash
+node src/medir_recurrentes.js
+```
+
+Ejecutar las pruebas:
 
 ```bash
 node src/verificar.js
@@ -31,15 +37,15 @@ node src/verificar.js
 - ¿Cuántas unidades se vendieron por producto?
 - ¿Cuál es el ticket promedio y qué sucede si no hay ventas?
 - ¿Cuáles son los tres productos con mayor valor vendido?
-- ¿Cómo crece el número de operaciones cuando aumenta el tamaño del arreglo?
-- ¿Qué diferencia hay entre una función O(1) y una O(n)?
+- ¿Qué clientes realizaron más de una compra?
+- ¿Cómo crece el número de operaciones y el tiempo cuando aumenta el tamaño del arreglo?
 
 ## Generación y medición
 - `src/generador.js` exporta `generarVentas(n)`, que crea n ventas con la misma estructura de los datos originales.
-- Los productos, precios y ciudades se eligen de listas fijas; cliente, producto, ciudad y cantidad se seleccionan aleatoriamente.
-- `src/analitica.js` incluye versiones instrumentadas que cuentan visitas y comparaciones.
-- `src/medir.js` ejecuta las funciones para cuatro tamaños y muestra una tabla de operaciones.
-- `bitacora.md` contiene la predicción previa, el criterio de conteo, los resultados y la clasificación de complejidad.
+- `src/analitica.js` contiene funciones de análisis, versiones instrumentadas y `clientesRecurrentes`.
+- `src/medir.js` mide operaciones para cuatro tamaños.
+- `src/medir_recurrentes.js` mide el tiempo de búsqueda de clientes recurrentes con `console.time`.
+- `bitacora.md` contiene las trazas, predicciones, mediciones y análisis de complejidad.
 
 ## Estructura
 - `src/datos.js`: registros originales.
@@ -47,5 +53,6 @@ node src/verificar.js
 - `src/generador.js`: generación de datos de prueba.
 - `src/reporte.js`: informe de ventas.
 - `src/medir.js`: experimento de crecimiento de operaciones.
+- `src/medir_recurrentes.js`: medición de tiempo de clientes recurrentes.
 - `src/verificar.js`: pruebas y comprobaciones.
 - `bitacora.md`: decisiones, errores y análisis de complejidad.

@@ -1,6 +1,5 @@
 const assert = require("node:assert/strict");
 const ventas = require("./datos.js");
-
 const {
     totalVendido,
     unidadesVendidas,
@@ -10,7 +9,8 @@ const {
     unidadesVendidasM,
     ventasPorCiudadM,
     totalPorCiudad,
-    ventasDelDia
+    ventasDelDia,
+    clientesRecurrentes
 } = require("./analitica.js");
 
 function verificar(nombre, resultado, esperado) {
@@ -57,5 +57,16 @@ verificar("Cantidad de grupos de ciudades", Object.keys(ciudades).length, 4);
 assert.equal(Object.values(ciudades).every(Number.isFinite), true);
 assert.equal(Object.values(ciudades).some(Number.isNaN), false);
 console.log("Agrupaciones sin NaN ni claves duplicadas: OK");
+
+// Día 3: clientes que realizaron más de una compra.
+verificar("Clientes recurrentes de los 12 datos", clientesRecurrentes(ventas), ["C01", "C02", "C03"]);
+const ventasRecurrentesPrueba = [
+    { cliente: "C01" },
+    { cliente: "C02" },
+    { cliente: "C01" },
+    { cliente: "C03" },
+    { cliente: "C02" }
+];
+verificar("Clientes recurrentes en arreglo de 5 ventas", clientesRecurrentes(ventasRecurrentesPrueba), ["C01", "C02"]);
 
 console.log("\nTodas las pruebas finalizaron correctamente.");

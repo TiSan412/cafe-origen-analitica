@@ -87,3 +87,59 @@ Por su código y su crecimiento:
 - `totalPorCiudadInstrumentado`: **O(n)**, un recorrido y una comprobación por elemento.
 
 Ninguna tiene ciclos anidados ni compara cada venta con todas las demás; por eso no presentan crecimiento **O(n²)**.
+
+
+## 8. Clientes recurrentes y crecimiento del algoritmo (Día 3)
+
+### Función y verificación con los datos originales
+Se agregó `clientesRecurrentes(ventas)` a `src/analitica.js`. La función compara los clientes de cada venta con los clientes de las posiciones posteriores y agrega el identificador a `recurrentes` cuando encuentra otra compra, evitando agregarlo dos veces.
+
+Con los 12 registros del Día 1 devuelve:
+```js
+["C01", "C02", "C03"]
+```
+La comprobación quedó incorporada en `src/verificar.js`.
+
+### Traza manual con cinco ventas
+Se usó este arreglo de clientes: `[C01, C02, C01, C03, C02]`.
+
+| Posición i | Comparaciones con j | Resultado |
+|---:|---|---|
+| 0 (C01) | C01-C02, C01-C01, C01-C03, C01-C02 | Encuentra C01 |
+| 1 (C02) | C02-C01, C02-C03, C02-C02 | Encuentra C02 |
+| 2 (C01) | C01-C03, C01-C02 | No agrega duplicado |
+| 3 (C03) | C03-C02 | No encuentra repetición |
+
+Total: 4 + 3 + 2 + 1 = **10 comparaciones entre parejas**. La fórmula general del doble ciclo es:
+`n(n-1)/2`.
+Esta cantidad crece de forma cuadrática, O(n²).
+
+### Medición con console.time
+Se ejecutó `node src/medir_recurrentes.js` con Node.js v22.16.0. Se generaron los arreglos antes de iniciar cada cronómetro, de modo que el tiempo corresponde a la función y no al generador.
+
+| n | Tiempo medido |
+|---:|---:|
+| 1.000 | 37,376 ms |
+| 2.000 | 53,293 ms |
+| 4.000 | 246,976 ms |
+| 8.000 | 725,505 ms |
+| 16.000 | 2.978 s |
+
+Los tiempos pueden variar entre equipos y ejecuciones. Al duplicar n, el tiempo tiende a multiplicarse aproximadamente por cuatro, aunque los tamaños pequeños presentan variaciones por calentamiento del motor, planificación del sistema y aleatoriedad de los datos.
+
+### Estimaciones y prueba de 100.000
+Usando el último tiempo como referencia y suponiendo crecimiento cuadrático:
+- 100.000 ventas: 2,978 s × (100.000 / 16.000)² ≈ **116,3 segundos**.
+- 1.000.000 de ventas: 2,978 s × (1.000.000 / 16.000)² ≈ **11.632 segundos**, aproximadamente **3 horas y 14 minutos**.
+
+Como la estimación inicial para 100.000 era menor a dos minutos, se intentó ejecutar ese tamaño. El proceso superó el límite de ejecución de 130 segundos y fue interrumpido; por tanto, no se obtuvo un tiempo final exacto. Esto muestra que la extrapolación basada en tamaños menores puede quedarse corta. No se intentó ejecutar 1.000.000 porque la estimación ya es de varias horas.
+
+### Costo oculto de includes()
+La expresión `recurrentes.includes(ventas[i].cliente)` no es una consulta instantánea: busca el cliente recorriendo el arreglo `recurrentes`. Si hay k clientes recurrentes acumulados, esa búsqueda puede revisar hasta k elementos.
+
+Por tanto, el doble ciclo realiza O(n²) comparaciones de parejas, pero el costo adicional de `includes()` también debe sumarse. En un caso especialmente desfavorable, primero pueden acumularse muchos clientes recurrentes y después aparecer muchas parejas de otro cliente repetido. Cada coincidencia vuelve a recorrer una lista larga. Ese patrón puede elevar el peor caso de la implementación a **O(n³)**.
+
+Con los datos aleatorios del generador, el tiempo observado se comporta aproximadamente como cuadrático; eso no elimina el peor caso cúbico de la implementación.
+
+### Conclusión para la gerente
+El reporte se vuelve lento porque, para saber quién ha comprado más de una vez, el programa compara muchas ventas entre sí. Cuando aumenta la cantidad de registros, la cantidad de revisiones crece mucho más rápido que las ventas. Además, cada vez que encuentra un posible cliente repetido, vuelve a buscarlo en la lista de clientes ya identificados. Con bases grandes, este trabajo adicional puede hacer que el reporte tarde varios minutos o incluso más. Conviene cambiar la estrategia de búsqueda antes de usarlo con volúmenes grandes.
