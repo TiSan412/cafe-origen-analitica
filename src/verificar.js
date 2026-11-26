@@ -1,4 +1,5 @@
 const assert = require("node:assert/strict");
+const { generarVentas } = require("./generador.js");
 const ventas = require("./datos.js");
 const {
     totalVendido,
@@ -10,7 +11,9 @@ const {
     ventasPorCiudadM,
     totalPorCiudad,
     ventasDelDia,
-    clientesRecurrentes
+    clientesRecurrentes,
+    totalCiudadCadena,
+    totalCiudadUnaPasada
 } = require("./analitica.js");
 
 function verificar(nombre, resultado, esperado) {
@@ -68,5 +71,21 @@ const ventasRecurrentesPrueba = [
     { cliente: "C02" }
 ];
 verificar("Clientes recurrentes en arreglo de 5 ventas", clientesRecurrentes(ventasRecurrentesPrueba), ["C01", "C02"]);
+
+
+// Día 4: equivalencia de las dos estrategias para sumar por ciudad.
+const ventasGeneradas = generarVentas(10000);
+for (const ciudad of ["Medellín", "Bogotá", "Cali", "Pereira"]) {
+    verificar(
+        `Total de ${ciudad}: cadena y una pasada (10.000 ventas)`,
+        totalCiudadCadena(ventasGeneradas, ciudad),
+        totalCiudadUnaPasada(ventasGeneradas, ciudad)
+    );
+}
+verificar(
+    "Normalización de ciudad con espacios y mayúsculas",
+    totalCiudadCadena(ventasGeneradas, " bogotá "),
+    totalCiudadUnaPasada(ventasGeneradas, "BOGOTÁ")
+);
 
 console.log("\nTodas las pruebas finalizaron correctamente.");

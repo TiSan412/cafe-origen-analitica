@@ -37,15 +37,15 @@ node src/verificar.js
 - ¿Cuántas unidades se vendieron por producto?
 - ¿Cuál es el ticket promedio y qué sucede si no hay ventas?
 - ¿Cuáles son los tres productos con mayor valor vendido?
-- ¿Qué clientes realizaron más de una compra?
+- ¿Qué clientes realizaron más de una compra?\n- ¿Cómo comparar una solución encadenada con otra de una sola pasada en tiempo y espacio?
 - ¿Cómo crece el número de operaciones y el tiempo cuando aumenta el tamaño del arreglo?
 
 ## Generación y medición
 - `src/generador.js` exporta `generarVentas(n)`, que crea n ventas con la misma estructura de los datos originales.
-- `src/analitica.js` contiene funciones de análisis, versiones instrumentadas y `clientesRecurrentes`.
+- `src/analitica.js` contiene funciones de análisis, versiones instrumentadas, `clientesRecurrentes` y dos estrategias para sumar por ciudad.
 - `src/medir.js` mide operaciones para cuatro tamaños.
 - `src/medir_recurrentes.js` mide el tiempo de búsqueda de clientes recurrentes con `console.time`.
-- `bitacora.md` contiene las trazas, predicciones, mediciones y análisis de complejidad.
+- `bitacora.md` contiene las trazas, predicciones, mediciones y análisis de complejidad temporal y espacial.
 
 ## Estructura
 - `src/datos.js`: registros originales.

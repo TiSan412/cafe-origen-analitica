@@ -143,3 +143,65 @@ Con los datos aleatorios del generador, el tiempo observado se comporta aproxima
 
 ### Conclusión para la gerente
 El reporte se vuelve lento porque, para saber quién ha comprado más de una vez, el programa compara muchas ventas entre sí. Cuando aumenta la cantidad de registros, la cantidad de revisiones crece mucho más rápido que las ventas. Además, cada vez que encuentra un posible cliente repetido, vuelve a buscarlo en la lista de clientes ya identificados. Con bases grandes, este trabajo adicional puede hacer que el reporte tarde varios minutos o incluso más. Conviene cambiar la estrategia de búsqueda antes de usarlo con volúmenes grandes.
+
+
+## 9. Comparación de complejidad temporal y espacial (Día 4)
+
+### Dos versiones para sumar por ciudad
+
+Se agregaron dos funciones:
+
+- `totalCiudadCadena(ventas, ciudad)`: normaliza los registros con `map`, selecciona la ciudad con `filter`, extrae los valores con otro `map` y suma con `reduce`.
+- `totalCiudadUnaPasada(ventas, ciudad)`: normaliza la ciudad buscada una vez y recorre las ventas con un único `for...of`, acumulando el valor cuando coincide.
+
+Las dos se probaron con 10.000 ventas generadas. Los resultados coincidieron para Medellín, Bogotá, Cali y Pereira. También se comparó la normalización de `" bogotá "` con `"BOGOTÁ"`. La prueba se incorporó a `src/verificar.js`.
+
+### Recorridos, arreglos creados y complejidad
+
+| Versión | Recorridos completos | Arreglos nuevos | Tiempo | Espacio adicional |
+|---|---:|---:|---|---|
+| `totalCiudadCadena` | 4 en el peor caso: map, filter, map y reduce | 3 | O(n) | O(n) |
+| `totalCiudadUnaPasada` | 1 | 0 | O(n) | O(1) |
+
+En la versión encadenada se crean tres arreglos: el primero con ciudad normalizada y valor, el segundo con las ventas que coinciden y el tercero con los valores numéricos. El filtro puede conservar desde cero hasta n elementos.
+
+En la versión de una pasada solo se mantienen variables como la ciudad buscada y el total acumulado. No se construyen arreglos auxiliares.
+
+### Por qué ambas son O(n) en tiempo
+
+En el peor caso, la versión encadenada realiza un trabajo proporcional a n en cada uno de sus cuatro métodos: O(n) + O(n) + O(n) + O(n) = O(4n). En Big O se eliminan los factores constantes, por lo que queda O(n). La versión de una pasada también visita las n ventas una vez: O(n).
+
+La diferencia no está en la clase de crecimiento temporal, sino en la cantidad de trabajo constante y en la memoria auxiliar: la versión encadenada reserva arreglos adicionales; la versión de una pasada no.
+
+### Complejidad espacial de las funciones del motor
+
+Se considera memoria adicional, sin contar el arreglo de entrada. Las cantidades de ciudades o productos distintos se indican como d y p; en el peor caso pueden crecer hasta n.
+
+| Función | Espacio adicional | Motivo |
+|---|---|---|
+| `valorVenta` | O(1) | Calcula y devuelve un número. |
+| `totalVendido`, `totalVendidoM` | O(1) | Solo mantienen un acumulador. |
+| `unidadesVendidas`, `unidadesVendidasM` | O(1) | Solo mantienen un acumulador. |
+| `ventaMayor` | O(1) | Mantiene una referencia a la venta mayor. |
+| `ticketPromedio` | O(1) | Mantiene total y contador. |
+| `ventasPorCiudad` | O(1) | Mantiene ciudad buscada y total. |
+| `ventasPorCiudadM` | O(n) | `filter` crea un arreglo con las coincidencias. |
+| `totalPorCiudad` | O(d), peor O(n) | Crea un objeto con una entrada por ciudad distinta. |
+| `unidadesPorProducto` | O(p), peor O(n) | Crea un objeto con una entrada por producto distinto. |
+| `topProductosPorValor` | O(p), peor O(n) | Crea el objeto de totales, el arreglo de `Object.entries`, el resultado de `slice` y el arreglo final de `map`; `sort` también puede requerir memoria auxiliar. |
+| `ventasDelDia` | O(n) | `filter` crea un arreglo de resultados. |
+| `clientesRecurrentes` | O(n) | El arreglo de clientes recurrentes puede crecer hasta n. |
+| `totalCiudadCadena` | O(n) | Crea tres arreglos intermedios. |
+| `totalCiudadUnaPasada` | O(1) | Solo utiliza variables acumuladoras. |
+| `totalVendidoInstrumentado` | O(1) | Mantiene el total y actualiza un contador externo. |
+| `ventaMayorInstrumentada` | O(1) | Mantiene una referencia y actualiza un contador externo. |
+| `totalPorCiudadInstrumentado` | O(d), peor O(n) | Construye un objeto acumulador por ciudad. |
+| `primeraVentaInstrumentada` | O(1) | Accede al primer elemento y actualiza un contador externo. |
+
+`totalPorCiudad` y `unidadesPorProducto` no guardan una copia de todas las ventas: guardan un resumen por cada clave distinta. Su espacio depende del número de ciudades o productos diferentes. `topProductosPorValor` también conserva estructuras proporcionales al número de productos distintos durante el cálculo y ordenamiento.
+
+### Decisión para el motor
+
+Se conserva `totalCiudadUnaPasada` como implementación principal por su menor consumo de memoria y porque evita crear arreglos intermedios. La versión encadenada queda disponible como ejemplo didáctico de composición de métodos y para comparar legibilidad.
+
+Aunque la cadena expresa claramente los pasos de transformación, el motor debe priorizar el uso eficiente de recursos cuando procesa conjuntos grandes. Ambas versiones tienen tiempo O(n), pero la versión de una pasada tiene espacio adicional O(1), frente a O(n) de la versión encadenada.

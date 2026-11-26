@@ -49,6 +49,35 @@ function topProductosPorValor(ventas,k) {
 }
 function ventasDelDia(ventas,fecha) { return ventas.filter(venta=>venta.fecha===fecha); }
 
+
+// Suma las ventas de una ciudad usando métodos encadenados de arrays.
+function totalCiudadCadena(ventas, ciudad) {
+    const ciudadBuscada = ciudad.trim().toLowerCase();
+
+    return ventas
+        .map(venta => ({
+            ciudad: venta.ciudad.trim().toLowerCase(),
+            valor: valorVenta(venta)
+        }))
+        .filter(venta => venta.ciudad === ciudadBuscada)
+        .map(venta => venta.valor)
+        .reduce((total, valor) => total + valor, 0);
+}
+
+// Suma las ventas de una ciudad en un solo recorrido y sin arreglos intermedios.
+function totalCiudadUnaPasada(ventas, ciudad) {
+    const ciudadBuscada = ciudad.trim().toLowerCase();
+    let total = 0;
+
+    for (const venta of ventas) {
+        if (venta.ciudad.trim().toLowerCase() === ciudadBuscada) {
+            total += valorVenta(venta);
+        }
+    }
+
+    return total;
+}
+
 // Busca clientes que aparecen en dos o más ventas.
 function clientesRecurrentes(ventas) {
     const recurrentes = [];
@@ -111,4 +140,4 @@ function primeraVentaInstrumentada(ventas, contador) {
     return ventas[0];
 }
 
-module.exports={valorVenta,totalVendido,unidadesVendidas,ventaMayor,ticketPromedio,ventasPorCiudad,totalVendidoM,unidadesVendidasM,ventasPorCiudadM,totalPorCiudad,unidadesPorProducto,topProductosPorValor,ventasDelDia,clientesRecurrentes,totalVendidoInstrumentado,ventaMayorInstrumentada,totalPorCiudadInstrumentado,primeraVentaInstrumentada};
+module.exports={valorVenta,totalVendido,unidadesVendidas,ventaMayor,ticketPromedio,ventasPorCiudad,totalVendidoM,unidadesVendidasM,ventasPorCiudadM,totalPorCiudad,unidadesPorProducto,topProductosPorValor,ventasDelDia,totalCiudadCadena,totalCiudadUnaPasada,clientesRecurrentes,totalVendidoInstrumentado,ventaMayorInstrumentada,totalPorCiudadInstrumentado,primeraVentaInstrumentada};
